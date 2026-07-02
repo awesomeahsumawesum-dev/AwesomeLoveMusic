@@ -20,6 +20,7 @@
   *{box-sizing:border-box;}
   html,body{
     height:100%;
+    height: 100dvh;
     margin:0;
     background: radial-gradient(ellipse at 50% -10%, var(--bg-top), var(--bg-bottom) 72%);
     color:var(--ink);
@@ -32,6 +33,7 @@
     position:relative;
     width:100%;
     height:100%;
+    height: 100dvh;
     display:flex;
     flex-direction:column;
   }
@@ -111,15 +113,15 @@
   }
   @media (max-width: 600px){
     .cover-wrap{
-      width: min(62vw, 220px);
-      height: min(62vw, 220px);
+      width: min(38vw, 160px);
+      height: min(38vw, 160px);
     }
     .stage{
-      perspective: 700px;
+      perspective: 600px;
       perspective-origin: 50% 45%;
     }
     .track-panel{
-      max-height: 26vh;
+      max-height: 28vh;
     }
     .info .title{
       font-size: 16px;
