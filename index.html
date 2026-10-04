@@ -2858,6 +2858,14 @@
   .al-vol-digit{ display:inline-block; margin:0 0.015em; }
   .al-vol-digit svg{ display:block; overflow:visible; filter:saturate(1.6) brightness(1.2) drop-shadow(0 0 0.06em rgba(255,255,255,0.35)); }
   .al-vol-pct{ font-size:0.62em; line-height:1; margin-left:0.06em; padding-bottom:0.02em; }
+
+  .fs-story-btn.in-controls{
+    position:static;
+    transform:none;
+    top:auto; left:auto;
+    padding:2px 4px;
+  }
+  .fs-story-btn.in-controls .story-btn-img{ height:40px; }
 </style>
 </head>
 <body>
@@ -8448,7 +8456,7 @@ function setReleaseView(list, opts){
   const btn = document.getElementById('fsStoryBtn');
   if (!btn) return;
   let lastIdx = -2;
-  function sync(){
+  function check(){
     const open = fsOverlay.classList.contains('open');
     const idx = open ? fsViewIdx : -1;
     if (idx !== lastIdx){
@@ -8456,14 +8464,38 @@ function setReleaseView(list, opts){
       const rel = idx >= 0 ? releases[idx] : null;
       btn.classList.toggle('show', !!(rel && rel.story));
     }
-    requestAnimationFrame(sync);
   }
+  function sync(){ check(); requestAnimationFrame(sync); }
   requestAnimationFrame(sync);
+  // show it the instant fullscreen opens, without waiting for the next frame
+  if (window.MutationObserver) new MutationObserver(check).observe(fsOverlay, { attributes:true, attributeFilter:['class'] });
   btn.addEventListener('pointerdown', (e) => e.stopPropagation());
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     openStory(fsViewIdx);
   });
+  // phone turned sideways: there's no room above the cover, so the Story button
+  // sits in the middle of the bottom row, between the Love heart and the Disco ball
+  const homeParent = btn.parentElement;
+  const homeNext = btn.nextSibling;
+  const sideways = window.matchMedia ? window.matchMedia('(orientation: landscape) and (max-height: 600px)') : null;
+  function placeStoryBtn(){
+    const row = document.querySelector('.fs-bottom-controls');
+    const disco = document.getElementById('fsLightShowBtn');
+    if (sideways && sideways.matches && row && disco){
+      if (btn.parentElement !== row) row.insertBefore(btn, disco);
+      btn.classList.add('in-controls');
+    } else if (btn.parentElement !== homeParent){
+      homeParent.insertBefore(btn, homeNext && homeNext.parentNode === homeParent ? homeNext : null);
+      btn.classList.remove('in-controls');
+    }
+  }
+  placeStoryBtn();
+  if (sideways){
+    if (sideways.addEventListener) sideways.addEventListener('change', placeStoryBtn);
+    else if (sideways.addListener) sideways.addListener(placeStoryBtn);
+  }
+  window.addEventListener('resize', placeStoryBtn);
 })();
 
 /* ---------- every 8 seconds, one random album cover that's in view does a 3D spin ---------- */
